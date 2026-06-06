@@ -36,6 +36,8 @@ USB serial (termios)  →  ELM327 (HS-CAN, AT commands)  →  ECU (UDS / KWP)
 
 Or build from source (below).
 
+![Moto Service Tool — Service tab with connectivity panel and one-click service reset](docs/screenshot.png)
+
 ---
 
 ## What the research established
