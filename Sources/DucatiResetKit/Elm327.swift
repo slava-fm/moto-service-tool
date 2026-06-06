@@ -226,6 +226,43 @@ public struct ServiceResetResult {
     public var message: String
 }
 
+/// A per-model service-reset profile (ECU address + routine id).
+public struct ResetProfile: Identifiable, Hashable {
+    public let id: String
+    public let name: String
+    public let header: UInt32     // request CAN ID, e.g. 0x7E3
+    public let resp: UInt32       // response CAN ID, e.g. 0x7EB
+    public let routine: UInt8     // KWP StartRoutine local id, e.g. 0x09
+    public let validated: Bool    // confirmed on a real bike?
+    public let note: String
+
+    public init(id: String, name: String, header: UInt32, resp: UInt32,
+                routine: UInt8, validated: Bool, note: String) {
+        self.id = id; self.name = name; self.header = header; self.resp = resp
+        self.routine = routine; self.validated = validated; self.note = note
+    }
+
+    /// Built-in profiles. Only the Panigale V2 is validated; others are
+    /// candidate routines derived from MelcoDiag and are UNVERIFIED.
+    public static let builtIn: [ResetProfile] = [
+        .init(id: "panigale-v2", name: "Panigale V2 / 959 (validated)",
+              header: 0x7E3, resp: 0x7EB, routine: 0x09, validated: true,
+              note: "Confirmed on Panigale V2 (Superquadro, 2020–2024)."),
+        .init(id: "monster-scrambler", name: "Monster / Scrambler air-cooled (experimental)",
+              header: 0x7E3, resp: 0x7EB, routine: 0x07, validated: false,
+              note: "Unverified. May require security access (not included) and can fail safely."),
+        .init(id: "testastretta", name: "Hypermotard / SuperSport / Multistrada (experimental)",
+              header: 0x7E3, resp: 0x7EB, routine: 0x09, validated: false,
+              note: "Unverified candidate for other Testastretta dashboards."),
+    ]
+
+    public static func custom(header: UInt32, routine: UInt8) -> ResetProfile {
+        .init(id: "custom", name: "Custom",
+              header: header, resp: header + 8, routine: routine,
+              validated: false, note: "User-specified ECU header and routine.")
+    }
+}
+
 /// Quick connectivity snapshot for the UI.
 public struct Connectivity {
     public var adapterID: String
@@ -277,27 +314,38 @@ extension Elm327 {
                             voltageValue: volts, dashReachable: dash, engineReachable: engine)
     }
 
-    /// Runs MelcoDiag's confirmed annual service-reset routine on the dash ECU
-    /// (7E3), reading records 0x91/0x93 before and after to verify it took.
-    /// `dryRun` performs only the reads (no write/routine).
+    /// Convenience: run the validated Panigale V2 profile.
     public func panigaleV2ServiceReset(dryRun: Bool) -> ServiceResetResult {
+        serviceReset(profile: ResetProfile.builtIn[0], dryRun: dryRun)
+    }
+
+    /// Runs a service-reset routine for the given profile on its dashboard ECU,
+    /// reading records 0x91/0x93 before/after to verify. `dryRun` reads only.
+    /// The routine triple is StartRoutine(0x31) / RequestResults(0x33) /
+    /// StopRoutine(0x32) on the profile's routine id.
+    public func serviceReset(profile: ResetProfile, dryRun: Bool) -> ServiceResetResult {
         var log: [String] = []
         @discardableResult func cmd(_ c: String) -> [UInt8] {
             let bytes = parseFrame(transact(c))
             log.append("» \(c)   « \(bytes.isEmpty ? "—" : bytes.hex)")
             return bytes
         }
+        let hdr = String(format: "%03X", profile.header)
+        let rsp = String(format: "%03X", profile.resp)
+        let r = profile.routine
+        let startCmd   = String(format: "0431%02X00", r)   // 31 R 00
+        let resultsCmd = String(format: "0233%02X", r)     // 33 R
+        let stopCmd    = String(format: "0432%02X00", r)   // 32 R 00
+
         // Manual ISO-TP framing on the dashboard ECU.
         _ = transact("ATE0"); _ = transact("ATL0"); _ = transact("ATS1"); _ = transact("ATH0")
         _ = transact("ATSP6"); _ = transact("ATCAF0"); _ = transact("ATAT1")
-        _ = transact("ATSH7E3"); _ = transact("ATCRA7EB")
+        _ = transact("ATSH\(hdr)"); _ = transact("ATCRA\(rsp)")
 
         // Session (first request also wakes the ECU).
         _ = cmd("021001"); _ = cmd("021001")
 
-        func record(_ r: [UInt8]) -> [UInt8] {  // drop 5A xx, keep the value
-            r.count >= 2 ? Array(r.dropFirst(2)) : r
-        }
+        func record(_ x: [UInt8]) -> [UInt8] { x.count >= 2 ? Array(x.dropFirst(2)) : x }
         let before91 = record(cmd("021A91"))
         let before93 = record(cmd("021A93"))
 
@@ -309,9 +357,9 @@ extension Elm327 {
                 message: "Dry run: read service records only.")
         }
 
-        let r1 = cmd("04310900")   // StartRoutine 0x09  -> expect 71 09
-        let r2 = cmd("023309")     // RequestResults     -> expect 73
-        let r3 = cmd("04320900")   // StopRoutine        -> expect 72
+        let r1 = cmd(startCmd)     // StartRoutine  -> expect 71 R
+        let r2 = cmd(resultsCmd)   // RequestResults -> expect 73
+        let r3 = cmd(stopCmd)      // StopRoutine   -> expect 72
         _ = cmd("023E00")          // TesterPresent
 
         let after91 = record(cmd("021A91"))
@@ -328,6 +376,8 @@ extension Elm327 {
             msg = "Reset confirmed: routine acknowledged and service records updated."
         } else if started && stopped {
             msg = "Routine acknowledged. Records \(changed ? "changed" : "unchanged") — cycle ignition to verify."
+        } else if !profile.validated {
+            msg = "No acknowledgement — this profile is experimental and may not match your model. Nothing was changed."
         } else {
             msg = "Routine did not acknowledge as expected. Ensure ignition is ON and retry."
         }

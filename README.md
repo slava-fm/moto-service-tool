@@ -40,6 +40,27 @@ Or build from source (below).
 
 ---
 
+## Compatibility
+
+| Capability | Works on |
+|---|---|
+| **Service reset** (one-click) | ✅ **Panigale V2 / 959** (Superquadro, 2020–2024) — *validated* |
+| **Service reset** — other models | ⚠️ **Experimental** profiles (Monster/Scrambler, Hypermotard/SuperSport/Multistrada) + a **Custom** option (pick ECU header + routine). Unverified — see below. |
+| **Live data, VIN, fault codes, ECU scan** | Likely many Ducatis (and other ELM327 vehicles) that support standard OBD-II / UDS — *unverified outside the V2* |
+
+**How the model selector behaves:** the reset **self-verifies** — it checks the
+routine acknowledgement (`0x71`) and whether the dashboard records actually
+changed. On a non-matching model the experimental profiles simply **report "not
+acknowledged" and change nothing**, so trying one is low-risk. Security-gated
+models (some Monster/Scrambler) will fail because this build intentionally
+includes **no immobilizer/SecurityAccess** functionality.
+
+> ⚠️ The brand-new **2025 Panigale V2 (890 cc)** is a different platform/ECU and
+> is **not** covered. Validated profiles only claim the Superquadro V2.
+
+If you validate a routine for another model, please open an issue/PR with the
+ECU header + routine id so it can be added as a confirmed profile.
+
 ## What the research established
 
 - The **Panigale V2 service reset is done with MelcoDiag** (the M3C/M3D mode of

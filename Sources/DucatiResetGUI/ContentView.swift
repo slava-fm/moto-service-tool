@@ -150,8 +150,27 @@ struct ContentView: View {
 
     private var serviceResetCard: some View {
         group("Service Reset") {
-            Text("Resets the service indicator on the dashboard ECU using the confirmed Panigale V2 routine, then verifies the change.")
+            Text("Resets the service indicator on the dashboard ECU, then verifies the change.")
                 .font(.caption).foregroundStyle(.secondary)
+
+            // Model / profile selector
+            Picker("Model", selection: $vm.selectedProfileID) {
+                ForEach(vm.profiles) { Text($0.name).tag($0.id) }
+                Text("Custom…").tag("custom")
+            }
+            if vm.isCustomProfile {
+                HStack {
+                    Text("ECU").font(.caption)
+                    TextField("7E3", text: $vm.customHeaderHex).frame(width: 60).textFieldStyle(.roundedBorder)
+                    Text("Routine").font(.caption)
+                    TextField("09", text: $vm.customRoutineHex).frame(width: 50).textFieldStyle(.roundedBorder)
+                }
+            }
+            if !vm.effectiveProfile.validated {
+                Label("Experimental — unverified for this model. It self-verifies and won't change anything if the routine isn't accepted.",
+                      systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption2).foregroundStyle(.orange)
+            }
 
             Button {
                 showResetConfirm = true
@@ -189,8 +208,8 @@ struct ContentView: View {
                 Text(r.success ? "Reset confirmed" : "Check result")
                     .fontWeight(.semibold)
             }
-            ackBadge("routine started (71 09)", r.routineStarted)
-            ackBadge("routine completed (72 09)", r.routineStopped)
+            ackBadge("routine started (0x71)", r.routineStarted)
+            ackBadge("routine completed (0x72)", r.routineStopped)
             ackBadge("records changed", r.recordsChanged)
             Text("record 91: \(r.before91.hexCompact) → \(r.after91.hexCompact)")
                 .font(.caption2.monospaced()).foregroundStyle(.secondary)

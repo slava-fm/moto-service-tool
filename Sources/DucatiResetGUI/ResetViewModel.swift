@@ -30,6 +30,20 @@ final class ResetViewModel: ObservableObject {
     @Published var resetting = false
     @Published var lastReset: ServiceResetResult?
 
+    // Model / reset profile
+    let profiles: [ResetProfile] = ResetProfile.builtIn
+    @Published var selectedProfileID: String = ResetProfile.builtIn[0].id
+    @Published var customHeaderHex: String = "7E3"
+    @Published var customRoutineHex: String = "09"
+    var isCustomProfile: Bool { selectedProfileID == "custom" }
+    var effectiveProfile: ResetProfile {
+        if selectedProfileID == "custom" {
+            return ResetProfile.custom(header: UInt32(customHeaderHex.replacingOccurrences(of: "0x", with: ""), radix: 16) ?? 0x7E3,
+                                       routine: UInt8(customRoutineHex.replacingOccurrences(of: "0x", with: ""), radix: 16) ?? 0x09)
+        }
+        return profiles.first { $0.id == selectedProfileID } ?? profiles[0]
+    }
+
     // Live data / vehicle info / DTC
     @Published var live: LiveData?
     @Published var polling = false
@@ -166,13 +180,14 @@ final class ResetViewModel: ObservableObject {
         }
     }
 
-    /// One-click confirmed service-indicator reset on the dash ECU (7E3).
+    /// One-click service-indicator reset using the selected model profile.
     func serviceReset() {
         guard let e = elm else { status = "Connect first"; return }
+        let profile = effectiveProfile
         resetting = true; busy = true; status = "Resetting service indicator…"
-        append("— SERVICE RESET —")
+        append("— SERVICE RESET — \(profile.name)")
         io.async { [weak self] in
-            let result = e.panigaleV2ServiceReset(dryRun: false)
+            let result = e.serviceReset(profile: profile, dryRun: false)
             Task { @MainActor in
                 guard let self else { return }
                 self.resetting = false; self.busy = false
