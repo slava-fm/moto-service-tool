@@ -3,6 +3,13 @@ import Foundation
 import Darwin
 #endif
 
+/// A byte transport the ELM327 driver can talk over (serial or Bluetooth-LE).
+public protocol Transport: AnyObject {
+    func write(_ data: Data) throws
+    func read(timeout: TimeInterval) -> Data
+    func close()
+}
+
 public enum SerialError: Error, CustomStringConvertible {
     case openFailed(String)
     case configFailed(String)
@@ -21,7 +28,7 @@ public enum SerialError: Error, CustomStringConvertible {
 
 /// Thin POSIX wrapper around a USB-CDC serial device (e.g. an FTDI ELM327
 /// presenting as /dev/cu.usbserial-XXXX). No third-party dependencies.
-public final class SerialPort {
+public final class SerialPort: Transport {
     private var fd: Int32 = -1
     public let path: String
 

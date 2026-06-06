@@ -15,6 +15,10 @@ final class ResetViewModel: ObservableObject {
     @Published var protocolCode: String = "6"          // HS-CAN 11b/500k
     @Published var headerHex: String = "7E0"
 
+    // Bluetooth-LE (experimental)
+    @Published var bleDevices: [BLEDevice] = []
+    @Published var scanningBLE = false
+
     // Live state
     @Published var connected = false
     @Published var busy = false
@@ -67,8 +71,9 @@ final class ResetViewModel: ObservableObject {
     private var proxy: SerialProxy?
 
     private let io = DispatchQueue(label: "ducati.io")
-    private var port: SerialPort?
+    private var transport: Transport?
     private var elm: Elm327?
+    private var isBLE: Bool { selectedPort.hasPrefix("ble:") }
 
     private var header: UInt32 { UInt32(headerHex.replacingOccurrences(of: "0x", with: ""), radix: 16) ?? 0x7E0 }
 
@@ -81,22 +86,50 @@ final class ResetViewModel: ObservableObject {
         status = ports.isEmpty ? "No serial adapters found" : "\(ports.count) port(s) found"
     }
 
+    // MARK: - Bluetooth-LE discovery
+
+    func scanBLE() {
+        bleDevices = []
+        scanningBLE = true
+        status = "Scanning for Bluetooth-LE adapters…"
+        BLETransport.shared.onDiscover = { [weak self] dev in
+            guard let self else { return }
+            if !self.bleDevices.contains(dev) { self.bleDevices.append(dev) }
+        }
+        BLETransport.shared.startScan()
+    }
+
+    func stopScanBLE() {
+        BLETransport.shared.stopScan()
+        scanningBLE = false
+    }
+
     // MARK: - Connect
 
     func connect() {
-        guard !selectedPort.isEmpty else { status = "Pick a serial port first"; return }
+        guard !selectedPort.isEmpty else { status = "Pick an adapter first"; return }
         busy = true; status = "Connecting…"
-        let path = selectedPort, baud = self.baud, proto = self.protocolCode, hdr = self.header
+        let sel = selectedPort, baud = self.baud, proto = self.protocolCode, hdr = self.header
+        let ble = isBLE
+        stopScanBLE()
         io.async { [weak self] in
             guard let self else { return }
-            let p = SerialPort(path: path)
-            do {
-                try p.open(baud: speed_t(baudConst(baud)))
-            } catch {
-                Task { @MainActor in self.busy = false; self.status = "Open failed: \(error)" }
-                return
+            let t: Transport
+            if ble {
+                let uuidStr = String(sel.dropFirst(4))   // strip "ble:"
+                guard let uuid = UUID(uuidString: uuidStr),
+                      BLETransport.shared.connect(uuid) else {
+                    Task { @MainActor in self.busy = false; self.status = "Bluetooth connect failed (pair/permission?)" }
+                    return
+                }
+                t = BLETransport.shared
+            } else {
+                let p = SerialPort(path: sel)
+                do { try p.open(baud: speed_t(baudConst(baud))) }
+                catch { Task { @MainActor in self.busy = false; self.status = "Open failed: \(error)" }; return }
+                t = p
             }
-            let e = Elm327(port: p)
+            let e = Elm327(port: t)
             e.currentHeader = hdr
             e.logger = { line in Task { @MainActor in self.append(line) } }
             do { try e.initialize(protocolCode: proto) }
@@ -107,7 +140,7 @@ final class ResetViewModel: ObservableObject {
             // Full connectivity probe (voltage + engine/dash ECU reachability).
             let c = e.connectivity()
             Task { @MainActor in
-                self.port = p; self.elm = e
+                self.transport = t; self.elm = e
                 self.connected = true; self.busy = false
                 self.adapterInfo = "\(id)  ·  \(dp)"
                 self.voltage = c.voltage
@@ -123,10 +156,11 @@ final class ResetViewModel: ObservableObject {
     }
 
     func disconnect() {
+        let t = transport
         io.async { [weak self] in
-            self?.port?.close()
+            t?.close()
             Task { @MainActor in
-                self?.port = nil; self?.elm = nil
+                self?.transport = nil; self?.elm = nil
                 self?.connected = false; self?.status = "Disconnected"
             }
         }

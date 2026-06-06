@@ -97,12 +97,20 @@ struct ContentView: View {
     private var connectionCard: some View {
         group("Connection") {
             HStack {
-                Picker("Port", selection: $vm.selectedPort) {
+                Picker("Adapter", selection: $vm.selectedPort) {
                     ForEach(vm.ports, id: \.self) { Text(short($0)).tag($0) }
-                    if vm.ports.isEmpty { Text("— none —").tag("") }
+                    ForEach(vm.bleDevices) { d in Text("📶 \(d.name)").tag("ble:\(d.id.uuidString)") }
+                    if vm.ports.isEmpty && vm.bleDevices.isEmpty { Text("— none —").tag("") }
                 }
                 Button { vm.refreshPorts() } label: { Image(systemName: "arrow.clockwise") }
-                    .help("Rescan serial ports")
+                    .help("Rescan USB serial ports")
+                Button { vm.scanningBLE ? vm.stopScanBLE() : vm.scanBLE() } label: {
+                    Image(systemName: vm.scanningBLE ? "stop.circle" : "dot.radiowaves.left.and.right")
+                }
+                .help("Scan for Bluetooth-LE adapters (experimental)")
+            }
+            if vm.scanningBLE {
+                hint("Scanning Bluetooth… pick your adapter from the list when it appears.")
             }
             HStack {
                 if vm.connected {

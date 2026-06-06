@@ -48,6 +48,14 @@ Or build from source (below).
 | **Service reset** — other models | ⚠️ **Experimental** profiles (Monster/Scrambler, Hypermotard/SuperSport/Multistrada) + a **Custom** option (pick ECU header + routine). Unverified — see below. |
 | **Live data, VIN, fault codes, ECU scan** | Likely many Ducatis (and other ELM327 vehicles) that support standard OBD-II / UDS — *unverified outside the V2* |
 
+**Adapters / connection:**
+- **USB FTDI ELM327** — recommended, validated (serial).
+- **Bluetooth-LE ELM327** — *experimental* (app only): Connection → tap the Bluetooth
+  scan button, pick your adapter. Works with generic BLE dongles; **Carista**
+  (BLE) may work but is unverified.
+- **Classic-Bluetooth (SPP)** adapters may appear as a `/dev/cu.*` serial port.
+- **Wi-Fi** ELM327 adapters are not supported. The CLI is USB-serial only.
+
 **How the model selector behaves:** the reset **self-verifies** — it checks the
 routine acknowledgement (`0x71`) and whether the dashboard records actually
 changed. On a non-matching model the experimental profiles simply **report "not

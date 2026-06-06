@@ -40,6 +40,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>LSMinimumSystemVersion</key>  <string>13.0</string>
   <key>NSHighResolutionCapable</key> <true/>
   <key>LSApplicationCategoryType</key> <string>public.app-category.utilities</string>
+  <key>NSBluetoothAlwaysUsageDescription</key> <string>Connect to a Bluetooth-LE OBD (ELM327) adapter to read diagnostics and reset the service indicator.</string>
 </dict>
 </plist>
 PLIST

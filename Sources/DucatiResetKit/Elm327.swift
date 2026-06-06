@@ -55,7 +55,7 @@ public enum ElmError: Error, CustomStringConvertible {
 /// Drives an ELM327 (the same way JPDiag/MelcoDiag do): AT-command setup for
 /// HS-CAN, then hex requests with the adapter handling ISO-TP framing.
 public final class Elm327 {
-    public let port: SerialPort
+    public let port: Transport
     public var verbose = false
     public var currentHeader: UInt32 = 0x7E0
     /// Optional sink for verbose logging (used by the GUI). Defaults to stderr.
@@ -67,7 +67,7 @@ public final class Elm327 {
         "STOPPED", "?", "ACT ALERT"
     ]
 
-    public init(port: SerialPort) { self.port = port }
+    public init(port: Transport) { self.port = port }
 
     private func emit(_ s: String) {
         if let logger { logger(s) } else { FileHandle.standardError.write(Data((s + "\n").utf8)) }
