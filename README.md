@@ -61,18 +61,6 @@ includes **no immobilizer/SecurityAccess** functionality.
 If you validate a routine for another model, please open an issue/PR with the
 ECU header + routine id so it can be added as a confirmed profile.
 
-## What the research established
-
-- The **Panigale V2 service reset is done with MelcoDiag** (the M3C/M3D mode of
-  JPDiag). The bike's ECU is a **Mitsubishi/Continental "Melco"** type — that's
-  why *MelcoDiag*, not the Marelli-side *JPDiag*, is the tool that works.
-- ELM327 must be set to **HS-CAN = ISO 15765-4, 11-bit / 500 kbps** → ELM
-  protocol **`6`** (this tool's default).
-- Use a **genuine FTDI USB ELM327 at 38400 baud**. Clones are flaky; USB is far
-  more reliable than Bluetooth for this.
-- **The exact reset byte sequence is proprietary / not publicly documented.**
-  This tool does not ship a guessed payload. Instead it can **capture the real
-  sequence from MelcoDiag** and replay it (see below).
 
 ## Hardware
 
