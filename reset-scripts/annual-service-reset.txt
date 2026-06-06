@@ -1,0 +1,21 @@
+# Ducati Panigale V2 — annual service indicator reset
+# Dashboard ECU 7E3 (response 7EB), KWP2000-over-CAN, ATCAF0 manual framing.
+# Confirmed working 2026-06-05.
+ATZ
+ATE0
+ATL0
+ATS1
+ATSP6
+ATCAF0
+ATAT1
+ATSH7E3
+ATCRA7EB
+021001
+021A91
+021A93
+04310900
+023309
+04320900
+023E00
+021A91
+021A93

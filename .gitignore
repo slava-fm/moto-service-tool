@@ -1,0 +1,31 @@
+# Swift / build artifacts
+.build/
+build/
+*.dSYM/
+.swiftpm/
+DerivedData/
+
+# macOS
+.DS_Store
+
+# Local tooling / IDE
+.claude/
+
+# --- NEVER COMMIT: third-party / proprietary assets ---
+# Do not redistribute MelcoDiag, UpMap, or any decompiled/diagnostic vendor files.
+*.exe
+*.dll
+*.lic
+*.bin
+*.il
+Msdll*
+cle*.lic
+EnDtcM*
+MelcoDiag*
+*melco*
+*MELCO*
+*capture*.log
+*.log
+
+# Local serial captures / dumps
+*.dump
