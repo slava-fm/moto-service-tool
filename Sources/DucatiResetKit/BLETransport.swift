@@ -25,12 +25,31 @@ public final class BLETransport: NSObject, Transport, CBCentralManagerDelegate, 
     // discovery
     private var found: [UUID: CBPeripheral] = [:]
     public var onDiscover: ((BLEDevice) -> Void)?
+    /// Human-readable progress / state for the UI ("what it's doing now").
+    public var onStatus: ((String) -> Void)?
+    private func status(_ s: String) { let cb = onStatus; DispatchQueue.main.async { cb?(s) } }
+    /// Detailed log sink (GATT layout, etc.) — appended to the log, not the status line.
+    public var onLog: ((String) -> Void)?
+    private func dlog(_ s: String) { let cb = onLog; DispatchQueue.main.async { cb?(s) } }
+
+    private func propsString(_ p: CBCharacteristicProperties) -> String {
+        var t: [String] = []
+        if p.contains(.read) { t.append("read") }
+        if p.contains(.write) { t.append("write") }
+        if p.contains(.writeWithoutResponse) { t.append("writeNR") }
+        if p.contains(.notify) { t.append("notify") }
+        if p.contains(.indicate) { t.append("indicate") }
+        return t.joined(separator: ",")
+    }
     private var wantScan = false
 
     // active connection
     private var peripheral: CBPeripheral?
     private var writeChar: CBCharacteristic?
     private var notifyChar: CBCharacteristic?
+    private var expectedServices = 0
+    private var scannedServices = 0
+    private var allChars: [CBCharacteristic] = []
     private var rx = Data()
     private let lock = NSLock()
     private var readySem: DispatchSemaphore?
@@ -61,15 +80,18 @@ public final class BLETransport: NSObject, Transport, CBCentralManagerDelegate, 
     @discardableResult
     public func connect(_ id: UUID, timeout: TimeInterval = 12) -> Bool {
         stopScan()
-        guard let p = found[id] else { return false }
+        guard let p = found[id] else { status("Adapter no longer visible — rescan"); return false }
         isReady = false; writeChar = nil; notifyChar = nil
         lock.lock(); rx.removeAll(); lock.unlock()
         peripheral = p
         p.delegate = self
         let sem = DispatchSemaphore(value: 0)
         readySem = sem
+        status("Connecting to \(p.name ?? "adapter") over Bluetooth…")
         central.connect(p, options: nil)
         let ok = sem.wait(timeout: .now() + timeout) == .success
+        if !ok { status("Bluetooth connect timed out") }
+        else if !isReady { status("Connected, but no ELM327 service found on this adapter") }
         return ok && isReady
     }
 
@@ -107,8 +129,13 @@ public final class BLETransport: NSObject, Transport, CBCentralManagerDelegate, 
     // MARK: - CBCentralManagerDelegate
 
     public func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        if central.state == .poweredOn && wantScan {
-            central.scanForPeripherals(withServices: nil)
+        switch central.state {
+        case .poweredOn:
+            if wantScan { status("Scanning for Bluetooth adapters…"); central.scanForPeripherals(withServices: nil) }
+        case .poweredOff:    status("Bluetooth is OFF — turn it on in Control Center / System Settings")
+        case .unauthorized:  status("Bluetooth permission denied — enable in System Settings ▸ Privacy ▸ Bluetooth")
+        case .unsupported:   status("Bluetooth LE not available on this device (e.g. Simulator)")
+        default:             status("Bluetooth not ready (\(central.state.rawValue))…")
         }
     }
 
@@ -124,35 +151,67 @@ public final class BLETransport: NSObject, Transport, CBCentralManagerDelegate, 
     }
 
     public func centralManager(_ central: CBCentralManager, didConnect p: CBPeripheral) {
+        status("Connected — discovering services…")
         p.discoverServices(nil)
     }
 
     public func centralManager(_ central: CBCentralManager, didFailToConnect p: CBPeripheral, error: Error?) {
+        status("Failed to connect: \(error?.localizedDescription ?? "unknown")")
         readySem?.signal()
     }
 
     // MARK: - CBPeripheralDelegate
 
     public func peripheral(_ p: CBPeripheral, didDiscoverServices error: Error?) {
-        for s in p.services ?? [] { p.discoverCharacteristics(nil, for: s) }
+        let services = p.services ?? []
+        expectedServices = services.count
+        scannedServices = 0
+        allChars.removeAll()
+        for s in services {
+            dlog("service \(s.uuid)")
+            p.discoverCharacteristics(nil, for: s)
+        }
     }
 
     public func peripheral(_ p: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         for ch in service.characteristics ?? [] {
-            if writeChar == nil,
-               ch.properties.contains(.write) || ch.properties.contains(.writeWithoutResponse) {
-                writeChar = ch
-            }
-            if notifyChar == nil,
-               ch.properties.contains(.notify) || ch.properties.contains(.indicate) {
-                notifyChar = ch
-                p.setNotifyValue(true, for: ch)
-            }
+            dlog("  char \(ch.uuid) [\(propsString(ch.properties))]")
+            allChars.append(ch)
         }
-        if writeChar != nil && notifyChar != nil && !isReady {
-            isReady = true
-            readySem?.signal()
+        scannedServices += 1
+        guard scannedServices >= expectedServices, !isReady else { return }
+        chooseCharacteristics(p)
+    }
+
+    /// Pick the data characteristics once ALL services are known, preferring the
+    /// canonical ELM327 BLE UUIDs (FFF2 write / FFF1 notify, or FFE1) over any
+    /// vendor service that happens to be discovered first.
+    private func chooseCharacteristics(_ p: CBPeripheral) {
+        func pick(_ prefs: [String], _ need: (CBCharacteristicProperties) -> Bool) -> CBCharacteristic? {
+            for u in prefs {
+                if let c = allChars.first(where: {
+                    $0.uuid.uuidString.caseInsensitiveCompare(u) == .orderedSame && need($0.properties)
+                }) { return c }
+            }
+            return allChars.first { need($0.properties) }
         }
+        notifyChar = pick(["FFF1", "FFE1", "FFE0"], { $0.contains(.notify) || $0.contains(.indicate) })
+        writeChar  = pick(["FFF2", "FFE1", "FFF1"], { $0.contains(.write) || $0.contains(.writeWithoutResponse) })
+
+        guard let n = notifyChar, let w = writeChar else {
+            status("No usable ELM327 characteristics found on this adapter")
+            readySem?.signal(); return
+        }
+        dlog("→ WRITE \(w.uuid) [\(propsString(w.properties))]")
+        dlog("→ NOTIFY \(n.uuid) [\(propsString(n.properties))]")
+        p.setNotifyValue(true, for: n)
+        isReady = true
+        status("Bluetooth link ready — talking to adapter…")
+        readySem?.signal()
+    }
+
+    public func peripheral(_ p: CBPeripheral, didUpdateNotificationStateFor ch: CBCharacteristic, error: Error?) {
+        dlog("notify \(ch.uuid) = \(ch.isNotifying ? "ON" : "off")\(error.map { " err: \($0.localizedDescription)" } ?? "")")
     }
 
     public func peripheral(_ p: CBPeripheral, didUpdateValueFor ch: CBCharacteristic, error: Error?) {

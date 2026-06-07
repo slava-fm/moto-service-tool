@@ -51,8 +51,7 @@ Or build from source (below).
 **Adapters / connection:**
 - **USB FTDI ELM327** — recommended, validated (serial).
 - **Bluetooth-LE ELM327** — *experimental* (app only): Connection → tap the Bluetooth
-  scan button, pick your adapter. Works with generic BLE dongles; **Carista**
-  (BLE) may work but is unverified.
+  scan button, pick your adapter. Works with generic BLE dongles; **Carista** (BLE) — tested working.
 - **Classic-Bluetooth (SPP)** adapters may appear as a `/dev/cu.*` serial port.
 - **Wi-Fi** ELM327 adapters are not supported. The CLI is USB-serial only.
 

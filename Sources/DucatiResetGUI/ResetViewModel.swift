@@ -91,10 +91,19 @@ final class ResetViewModel: ObservableObject {
     func scanBLE() {
         bleDevices = []
         scanningBLE = true
-        status = "Scanning for Bluetooth-LE adapters…"
+        status = "Starting Bluetooth scan…"
+        append("BLE: starting scan")
+        BLETransport.shared.onStatus = { [weak self] s in
+            self?.status = s; self?.append("BLE: \(s)")
+        }
+        BLETransport.shared.onLog = { [weak self] s in self?.append("BLE: \(s)") }
         BLETransport.shared.onDiscover = { [weak self] dev in
             guard let self else { return }
-            if !self.bleDevices.contains(dev) { self.bleDevices.append(dev) }
+            if !self.bleDevices.contains(dev) {
+                self.bleDevices.append(dev)
+                self.append("BLE: found “\(dev.name)”")
+                self.status = "Found \(self.bleDevices.count) device(s) — pick yours"
+            }
         }
         BLETransport.shared.startScan()
     }
@@ -131,7 +140,9 @@ final class ResetViewModel: ObservableObject {
             }
             let e = Elm327(port: t)
             e.currentHeader = hdr
+            e.verbose = true   // stream every command/response to the log
             e.logger = { line in Task { @MainActor in self.append(line) } }
+            e.onStage = { s in Task { @MainActor in self.status = s; self.append("• \(s)") } }
             do { try e.initialize(protocolCode: proto) }
             catch { Task { @MainActor in self.busy = false; self.status = "Init failed: \(error)" }; return }
 

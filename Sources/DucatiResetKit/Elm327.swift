@@ -60,6 +60,9 @@ public final class Elm327 {
     public var currentHeader: UInt32 = 0x7E0
     /// Optional sink for verbose logging (used by the GUI). Defaults to stderr.
     public var logger: ((String) -> Void)?
+    /// Optional sink for human-readable progress ("what it's doing now").
+    public var onStage: ((String) -> Void)?
+    private func stage(_ s: String) { onStage?(s) }
 
     private static let errorMarkers = [
         "NO DATA", "CAN ERROR", "BUFFER FULL", "UNABLE TO CONNECT",
@@ -107,6 +110,7 @@ public final class Elm327 {
     /// JPDiag/MelcoDiag-style init for the Panigale V2 (HS-CAN).
     /// protocolCode "6" = ISO 15765-4 CAN 11-bit/500k.
     public func initialize(protocolCode: String = "6") throws {
+        stage("Initializing adapter (ATZ)…")
         try? writeLine("")
         _ = readUntilPrompt(timeout: 0.5)
         _ = transact("ATZ", timeout: 3.0)
@@ -294,6 +298,7 @@ extension Elm327 {
 
     /// Reads adapter id, battery voltage, and whether the engine/dash ECUs answer.
     public func connectivity() -> Connectivity {
+        stage("Reading adapter info & voltage…")
         let id = transact("ATI").trimmingCharacters(in: .whitespacesAndNewlines)
         let rv = transact("ATRV").trimmingCharacters(in: .whitespacesAndNewlines)
         let volts = Double(rv.lowercased().replacingOccurrences(of: "v", with: "")) ?? 0
@@ -308,7 +313,9 @@ extension Elm327 {
             }
             return false
         }
+        stage("Probing engine ECU (7E0)…")
         let engine = probe("7E0", "7E8")
+        stage("Probing dashboard ECU (7E3)…")
         let dash = probe("7E3", "7EB")
         return Connectivity(adapterID: id.isEmpty ? "?" : id, voltage: rv,
                             voltageValue: volts, dashReachable: dash, engineReachable: engine)
