@@ -73,12 +73,24 @@ ECU header + routine id so it can be added as a confirmed profile.
 ## Hardware
 
 ```
-Bike 6-pin Euro5 port ── [your 6→16 OBD-II cable] ── ELM327 (USB) ── Mac
+Bike 6-pin Euro5 port ── [6→16 OBD-II adapter cable] ── ELM327 ── Mac/iPhone
 ```
-- ⚠️ Confirm the **6-pin connector physically fits your Panigale V2** — your
-  cable's listing names Guzzi/Kawasaki/Honda/Suzuki/Yamaha/Harley, not Ducati.
-- Plug the ELM327 into the 16-pin side. It appears on the Mac as
-  `/dev/cu.usbserial-XXXX` (USB) or `/dev/cu.<name>` (Bluetooth, after pairing).
+
+You need **two** pieces:
+
+1. **Diagnostic adapter cable (required):** a **6-Pin OBD2 Adapter Cable with a
+   Euro5 6-pin connector that fits Ducati** — e.g. listed as
+   *"6 Pin OBD2 Adapter Cable, Euro5 6-pin Connector, fit for 2019+ Ducati"*.
+   This converts the Panigale V2's 6-pin Euro5 diagnostic port to a standard
+   16-pin OBD-II socket. **Make sure the cable explicitly lists Ducati fitment** —
+   generic motorcycle cables that don't name Ducati may not match the V2's port.
+2. **ELM327 interface:**
+   - **macOS:** a **USB FTDI ELM327** (recommended, validated) — appears as
+     `/dev/cu.usbserial-XXXX`. A Bluetooth-LE ELM327 also works (experimental).
+   - **iOS:** a **Bluetooth-LE ELM327** (e.g. Carista, Vgate iCar Pro BLE,
+     OBDLink CX/MX+). USB is not supported on iOS — see [ios/README.md](ios/README.md).
+
+Plug the ELM327 into the 16-pin side of the adapter cable.
 
 ## Features (v1.0)
 
