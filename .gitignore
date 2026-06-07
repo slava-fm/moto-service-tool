@@ -29,3 +29,9 @@ MelcoDiag*
 
 # Local serial captures / dumps
 *.dump
+
+# Xcode user state (keep the generated project itself)
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/

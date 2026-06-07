@@ -6,19 +6,23 @@ let package = Package(
     platforms: [
         .macOS(.v13)
     ],
+    products: [
+        .library(name: "DucatiResetKit", targets: ["DucatiResetKit"])
+    ],
     targets: [
-        // Shared engine: serial I/O, ELM327/UDS, capture proxy, high-level ops.
+        // Shared engine: ELM327/UDS, BLE transport (cross-platform);
+        // serial I/O + capture proxy are macOS-only (guarded by #if os(macOS)).
         .target(
             name: "DucatiResetKit",
             path: "Sources/DucatiResetKit"
         ),
-        // Command-line interface.
+        // Command-line interface (macOS).
         .executableTarget(
             name: "motodiag",
             dependencies: ["DucatiResetKit"],
             path: "Sources/motodiag"
         ),
-        // Native SwiftUI desktop app.
+        // Native SwiftUI desktop app (macOS).
         .executableTarget(
             name: "DucatiResetGUI",
             dependencies: ["DucatiResetKit"],

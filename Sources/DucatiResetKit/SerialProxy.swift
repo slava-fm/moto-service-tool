@@ -1,7 +1,6 @@
+#if os(macOS)
 import Foundation
-#if canImport(Darwin)
 import Darwin
-#endif
 
 /// A man-in-the-middle between MelcoDiag/JPDiag (or any serial diag tool) and
 /// the real ELM327. Opens a pseudo-terminal (PTY); point the other tool's
@@ -115,3 +114,4 @@ public final class SerialProxy {
         return commands
     }
 }
+#endif

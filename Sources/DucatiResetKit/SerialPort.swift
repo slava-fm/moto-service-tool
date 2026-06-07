@@ -1,14 +1,6 @@
+#if os(macOS)
 import Foundation
-#if canImport(Darwin)
 import Darwin
-#endif
-
-/// A byte transport the ELM327 driver can talk over (serial or Bluetooth-LE).
-public protocol Transport: AnyObject {
-    func write(_ data: Data) throws
-    func read(timeout: TimeInterval) -> Data
-    func close()
-}
 
 public enum SerialError: Error, CustomStringConvertible {
     case openFailed(String)
@@ -120,3 +112,4 @@ public final class SerialPort: Transport {
             .sorted()
     }
 }
+#endif

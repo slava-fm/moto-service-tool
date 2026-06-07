@@ -1,0 +1,368 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0236B769B0EC13A63913171E /* Elm327.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33E06492B6E2B78EEAFD6B32 /* Elm327.swift */; };
+		23B26DB4B7E6CE77E53D4661 /* BLETransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1028527B6E6619827C7BFFB5 /* BLETransport.swift */; };
+		3BBE6ECFA0E712984DF0FF78 /* SerialProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9E35F2137C62318144A2FA /* SerialProxy.swift */; };
+		42A03365B5B98707DB7E46E4 /* SerialPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FE7D3BC49C0E0568F500DF /* SerialPort.swift */; };
+		592B270728B0D093A1A74388 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3AABD52820F61ABACB6C14 /* ContentView.swift */; };
+		9628F4B7A01658FE264DC5A9 /* BikeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEE291617D5F39949FA9C23 /* BikeViewModel.swift */; };
+		9BD6DA976110CD444C4A667A /* MotoServiceToolApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B9D12C44FE31ADE6833A581 /* MotoServiceToolApp.swift */; };
+		BA42CAFB3E1356478AFECB51 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FE42488F60962AD98419359B /* Assets.xcassets */; };
+		C9ECFF8AA80337BD33A40715 /* Transport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190DABDEEBAA9815DE3AAAA1 /* Transport.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1028527B6E6619827C7BFFB5 /* BLETransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLETransport.swift; sourceTree = "<group>"; };
+		190DABDEEBAA9815DE3AAAA1 /* Transport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transport.swift; sourceTree = "<group>"; };
+		33E06492B6E2B78EEAFD6B32 /* Elm327.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Elm327.swift; sourceTree = "<group>"; };
+		5C9E35F2137C62318144A2FA /* SerialProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialProxy.swift; sourceTree = "<group>"; };
+		6CEE291617D5F39949FA9C23 /* BikeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BikeViewModel.swift; sourceTree = "<group>"; };
+		7B9D12C44FE31ADE6833A581 /* MotoServiceToolApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotoServiceToolApp.swift; sourceTree = "<group>"; };
+		836E0122CAEBEA63895CE905 /* MotoServiceTool.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MotoServiceTool.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		96FE7D3BC49C0E0568F500DF /* SerialPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialPort.swift; sourceTree = "<group>"; };
+		FE3AABD52820F61ABACB6C14 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FE42488F60962AD98419359B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		15694C192F2E6D6A6E41D350 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				836E0122CAEBEA63895CE905 /* MotoServiceTool.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		395BD0A622F73FCBA0225555 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				FE42488F60962AD98419359B /* Assets.xcassets */,
+				6CEE291617D5F39949FA9C23 /* BikeViewModel.swift */,
+				FE3AABD52820F61ABACB6C14 /* ContentView.swift */,
+				7B9D12C44FE31ADE6833A581 /* MotoServiceToolApp.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		5886B54460CB4BC623716BC3 /* Ducati Service reset tool */ = {
+			isa = PBXGroup;
+			children = (
+				CCF93F1B86A944606D0328A4 /* Sources */,
+			);
+			name = "Ducati Service reset tool";
+			path = ..;
+			sourceTree = "<group>";
+		};
+		A48AAE4954C79DEA615E6F98 = {
+			isa = PBXGroup;
+			children = (
+				5886B54460CB4BC623716BC3 /* Ducati Service reset tool */,
+				395BD0A622F73FCBA0225555 /* Sources */,
+				15694C192F2E6D6A6E41D350 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CCF93F1B86A944606D0328A4 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				F2FD20B0A1A7EF937239D4E6 /* Engine */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		F2FD20B0A1A7EF937239D4E6 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				1028527B6E6619827C7BFFB5 /* BLETransport.swift */,
+				33E06492B6E2B78EEAFD6B32 /* Elm327.swift */,
+				96FE7D3BC49C0E0568F500DF /* SerialPort.swift */,
+				5C9E35F2137C62318144A2FA /* SerialProxy.swift */,
+				190DABDEEBAA9815DE3AAAA1 /* Transport.swift */,
+			);
+			name = Engine;
+			path = DucatiResetKit;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4BE109768C231B268E743A7D /* MotoServiceTool */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6143354E23B5991957171F93 /* Build configuration list for PBXNativeTarget "MotoServiceTool" */;
+			buildPhases = (
+				B705BEEB8B2918B22070ABAA /* Sources */,
+				FFF0A7EFE2A377E82DFC95D3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MotoServiceTool;
+			packageProductDependencies = (
+			);
+			productName = MotoServiceTool;
+			productReference = 836E0122CAEBEA63895CE905 /* MotoServiceTool.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		44966C284B2B1CDD9C88D255 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					4BE109768C231B268E743A7D = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 76BF202FB3214E5E2B50DA83 /* Build configuration list for PBXProject "MotoServiceTool" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = A48AAE4954C79DEA615E6F98;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 15694C192F2E6D6A6E41D350 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4BE109768C231B268E743A7D /* MotoServiceTool */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FFF0A7EFE2A377E82DFC95D3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA42CAFB3E1356478AFECB51 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B705BEEB8B2918B22070ABAA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				23B26DB4B7E6CE77E53D4661 /* BLETransport.swift in Sources */,
+				9628F4B7A01658FE264DC5A9 /* BikeViewModel.swift in Sources */,
+				592B270728B0D093A1A74388 /* ContentView.swift in Sources */,
+				0236B769B0EC13A63913171E /* Elm327.swift in Sources */,
+				9BD6DA976110CD444C4A667A /* MotoServiceToolApp.swift in Sources */,
+				42A03365B5B98707DB7E46E4 /* SerialPort.swift in Sources */,
+				3BBE6ECFA0E712984DF0FF78 /* SerialProxy.swift in Sources */,
+				C9ECFF8AA80337BD33A40715 /* Transport.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		211A1BC19C3E45BC66C5E625 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Connect to a Bluetooth-LE OBD (ELM327) adapter to read diagnostics and reset the service indicator.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vtwinfanatics.motoservicetool;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A9795FEEF0DFDDCAB0BE9E25 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C8CE1E4D3644C8DF5A635E14 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Connect to a Bluetooth-LE OBD (ELM327) adapter to read diagnostics and reset the service indicator.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vtwinfanatics.motoservicetool;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E91049D47BF348B1804DE3AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6143354E23B5991957171F93 /* Build configuration list for PBXNativeTarget "MotoServiceTool" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C8CE1E4D3644C8DF5A635E14 /* Debug */,
+				211A1BC19C3E45BC66C5E625 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		76BF202FB3214E5E2B50DA83 /* Build configuration list for PBXProject "MotoServiceTool" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A9795FEEF0DFDDCAB0BE9E25 /* Debug */,
+				E91049D47BF348B1804DE3AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 44966C284B2B1CDD9C88D255 /* Project object */;
+}

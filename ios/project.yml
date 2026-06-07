@@ -1,0 +1,30 @@
+name: MotoServiceTool
+options:
+  bundleIdPrefix: com.vtwinfanatics
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+targets:
+  MotoServiceTool:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Sources                      # iOS UI (App / ContentView / BikeViewModel) + Assets
+      - path: ../Sources/DucatiResetKit    # shared engine (serial files are #if os(macOS) → empty on iOS)
+        name: Engine
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vtwinfanatics.motoservicetool
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"       # iPhone + iPad
+        GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: "Connect to a Bluetooth-LE OBD (ELM327) adapter to read diagnostics and reset the service indicator."
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
+        CODE_SIGN_STYLE: Automatic
+        # Set your Apple Developer team in Xcode (Signing & Capabilities) before running on a device.

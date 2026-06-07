@@ -76,7 +76,7 @@ public final class BLETransport: NSObject, Transport, CBCentralManagerDelegate, 
     // MARK: - Transport
 
     public func write(_ data: Data) throws {
-        guard let p = peripheral, let ch = writeChar else { throw SerialError.notOpen }
+        guard let p = peripheral, let ch = writeChar else { throw TransportError.notOpen }
         let type: CBCharacteristicWriteType =
             ch.properties.contains(.writeWithoutResponse) ? .withoutResponse : .withResponse
         let maxLen = max(20, p.maximumWriteValueLength(for: type))
