@@ -45,6 +45,10 @@ struct ContentView: View {
 
     // MARK: footer (disclaimer)
 
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
+    }
+
     private var footer: some View {
         HStack(spacing: 6) {
             Image(systemName: "exclamationmark.triangle")
@@ -52,7 +56,7 @@ struct ContentView: View {
             Text("Use at your own risk. The author takes no responsibility for any damage. Not affiliated with Ducati.")
                 .font(.caption2).foregroundStyle(.secondary)
             Spacer()
-            Text("Created by V-twin Fanatics")
+            Text("Created by V-twin Fanatics · v\(appVersion)")
                 .font(.caption2.weight(.medium)).foregroundStyle(.secondary)
         }
         .padding(.horizontal, 14).padding(.vertical, 6)

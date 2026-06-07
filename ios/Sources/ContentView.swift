@@ -93,9 +93,23 @@ struct ContentView: View {
                 if let r = vm.lastReset { resetResult(r) }
             }
 
+            logSection
             disclaimerSection
         }
         .navigationTitle("Moto Service Tool")
+    }
+
+    private var logSection: some View {
+        Section("Log") {
+            ScrollView {
+                Text(vm.log.isEmpty ? "—" : vm.log)
+                    .font(.caption.monospaced())
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .textSelection(.enabled)
+            }
+            .frame(height: 160)
+            Button("Clear log") { vm.log = "" }
+        }
     }
 
     @ViewBuilder
@@ -149,9 +163,15 @@ struct ContentView: View {
 
     // MARK: helpers
 
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
+    }
+
     private var disclaimerSection: some View {
         Section {
             Text("Use at your own risk. The author takes no responsibility for any damage. Not affiliated with Ducati. Created by V-twin Fanatics.")
+                .font(.footnote).foregroundStyle(.secondary)
+            Text("Moto Service Tool v\(appVersion)")
                 .font(.footnote).foregroundStyle(.secondary)
         }
     }

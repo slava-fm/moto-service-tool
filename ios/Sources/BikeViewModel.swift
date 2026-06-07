@@ -55,10 +55,17 @@ final class BikeViewModel: ObservableObject {
     // MARK: Bluetooth
 
     func scan() {
-        devices = []; scanning = true; status = "Scanning for Bluetooth adapters…"
+        devices = []; scanning = true; status = "Starting Bluetooth scan…"
+        append("BLE: starting scan")
+        BLETransport.shared.onStatus = { [weak self] s in self?.status = s; self?.append("BLE: \(s)") }
+        BLETransport.shared.onLog = { [weak self] s in self?.append("BLE: \(s)") }
         BLETransport.shared.onDiscover = { [weak self] d in
             guard let self else { return }
-            if !self.devices.contains(d) { self.devices.append(d) }
+            if !self.devices.contains(d) {
+                self.devices.append(d)
+                self.append("BLE: found “\(d.name)”")
+                self.status = "Found \(self.devices.count) device(s) — pick yours"
+            }
         }
         BLETransport.shared.startScan()
     }
@@ -76,7 +83,9 @@ final class BikeViewModel: ObservableObject {
             let t: Transport = BLETransport.shared
             let e = Elm327(port: t)
             e.currentHeader = 0x7E0
+            e.verbose = true
             e.logger = { line in Task { @MainActor in self.append(line) } }
+            e.onStage = { s in Task { @MainActor in self.status = s; self.append("• \(s)") } }
             do { try e.initialize(protocolCode: "6") }
             catch { Task { @MainActor in self.busy = false; self.status = "Init failed: \(error)" }; return }
             let ident = e.transact("ATI").trimmingCharacters(in: .whitespacesAndNewlines)
