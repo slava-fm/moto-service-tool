@@ -30,7 +30,7 @@ USB serial (termios)  →  ELM327 (HS-CAN, AT commands)  →  ECU (UDS / KWP)
 
 ## Download
 
-**[⬇️ Download the latest release](https://github.com/slava-fm/moto-service-tool/releases/latest)** — grab `MotoServiceTool-v1.0.zip`, unzip, drag **MotoServiceTool.app** to `/Applications`.
+**[⬇️ Download the macOS app (latest release)](https://github.com/slava-fm/moto-service-tool/releases/latest)** — grab the `MotoServiceTool-*.zip`, unzip, and drag **MotoServiceTool.app** to `/Applications`.
 
 > First launch: **right-click → Open** (the app is ad-hoc signed, not notarized, so Gatekeeper asks once). Then plug in the ELM327 with the ignition ON and Connect.
 
