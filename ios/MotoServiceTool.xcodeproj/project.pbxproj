@@ -25,7 +25,7 @@
 		5C9E35F2137C62318144A2FA /* SerialProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialProxy.swift; sourceTree = "<group>"; };
 		6CEE291617D5F39949FA9C23 /* BikeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BikeViewModel.swift; sourceTree = "<group>"; };
 		7B9D12C44FE31ADE6833A581 /* MotoServiceToolApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotoServiceToolApp.swift; sourceTree = "<group>"; };
-		836E0122CAEBEA63895CE905 /* MotoServiceTool.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MotoServiceTool.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		836E0122CAEBEA63895CE905 /* MotoServiceTool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MotoServiceTool.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		96FE7D3BC49C0E0568F500DF /* SerialPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialPort.swift; sourceTree = "<group>"; };
 		FE3AABD52820F61ABACB6C14 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		FE42488F60962AD98419359B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -181,6 +181,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 6AJXMLW5K5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Connect to a Bluetooth-LE OBD (ELM327) adapter to read diagnostics and reset the service indicator.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -268,6 +269,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 6AJXMLW5K5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Connect to a Bluetooth-LE OBD (ELM327) adapter to read diagnostics and reset the service indicator.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
