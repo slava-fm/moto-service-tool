@@ -369,18 +369,48 @@ extension Elm327 {
         let r3 = cmd(stopCmd)      // StopRoutine   -> expect 72
         _ = cmd("023E00")          // TesterPresent
 
+        // Force the "last service" date record (0x91) to today's date. The
+        // routine above only re-stamps the date when a service is actually
+        // due, so on a not-yet-due bike the displayed date never advances.
+        // This explicit write makes it unconditional. KWP WriteDataByLocalId
+        // (0x3B) on the dashboard ECU; record layout is BCD: 00 YY MM DD
+        // (e.g. 00 26 06 05 = 2026-06-05). Dash ECU only — skipped for custom
+        // profiles on other headers.
+        var dateAck = false
+        var wantDate: [UInt8] = []
+        if profile.header == 0x7E3 {
+            func bcd(_ v: Int) -> UInt8 { UInt8(((v / 10) << 4) | (v % 10)) }
+            let c = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+            wantDate = [0x00, bcd((c.year ?? 2000) % 100), bcd(c.month ?? 1), bcd(c.day ?? 1)]
+            let payload: [UInt8] = [0x3B, 0x91] + wantDate          // 6 data bytes
+            let writeCmd = String(format: "%02X", payload.count)    // ISO-TP PCI length
+                + payload.map { String(format: "%02X", $0) }.joined()
+            dateAck = cmd(writeCmd).first == 0x7B                    // positive: 7B 91
+        }
+
         let after91 = record(cmd("021A91"))
         let after93 = record(cmd("021A93"))
 
         let started = r1.first == 0x71
         let results = r2.first == 0x73
         let stopped = r3.first == 0x72
+        let dateSet = !wantDate.isEmpty && after91 == wantDate      // read-back proof
         let changed = (after91 != before91) || (after93 != before93)
-        let success = started && stopped && (changed || results)
+        let success = started && stopped && (dateSet || changed || results)
+
+        func fmtBCDDate(_ b: [UInt8]) -> String {
+            guard b.count == 4 else { return b.hex }
+            func dec(_ x: UInt8) -> Int { Int(x >> 4) * 10 + Int(x & 0x0F) }
+            return String(format: "20%02d-%02d-%02d", dec(b[1]), dec(b[2]), dec(b[3]))
+        }
 
         let msg: String
-        if success && changed {
-            msg = "Reset confirmed: routine acknowledged and service records updated."
+        if started && stopped && dateSet {
+            msg = "✅ Reset complete — service date set to \(fmtBCDDate(after91)). Cycle the ignition to refresh the dash."
+        } else if started && stopped && !wantDate.isEmpty && dateAck {
+            msg = "Routine ran and the date write was accepted, but read-back still shows \(fmtBCDDate(after91)). Cycle the ignition and re-check."
+        } else if started && stopped && !wantDate.isEmpty {
+            msg = "Routine acknowledged, but the dash rejected the date write (no 7B 91). The reset ran; the date may stay at \(fmtBCDDate(after91)). Share the log so the write can be adjusted."
         } else if started && stopped {
             msg = "Routine acknowledged. Records \(changed ? "changed" : "unchanged") — cycle ignition to verify."
         } else if !profile.validated {
