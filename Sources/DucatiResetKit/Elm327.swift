@@ -1,4 +1,9 @@
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 extension Array where Element == UInt8 {
     public var hex: String { map { String(format: "%02X", $0) }.joined(separator: " ") }
@@ -369,18 +374,66 @@ extension Elm327 {
         let r3 = cmd(stopCmd)      // StopRoutine   -> expect 72
         _ = cmd("023E00")          // TesterPresent
 
+        // Force the "last service" date record (0x91) to today's date. The
+        // routine above only re-stamps the date when a service is actually
+        // due, so on a not-yet-due bike the displayed date never advances.
+        // This explicit write makes it unconditional. KWP WriteDataByLocalId
+        // (0x3B) on the dashboard ECU; record layout is BCD: 00 YY MM DD
+        // (e.g. 00 26 06 05 = 2026-06-05). Dash ECU only — skipped for custom
+        // profiles on other headers.
+        var dateAck = false
+        var wantDate: [UInt8] = []
+        var dateWriteNRC: UInt8? = nil
+        if profile.header == 0x7E3 {
+            func bcd(_ v: Int) -> UInt8 { UInt8(((v / 10) << 4) | (v % 10)) }
+            let c = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+            wantDate = [0x00, bcd((c.year ?? 2000) % 100), bcd(c.month ?? 1), bcd(c.day ?? 1)]
+            let payload: [UInt8] = [0x3B, 0x91] + wantDate          // 6 data bytes
+            let writeCmd = String(format: "%02X", payload.count)    // ISO-TP PCI length
+                + payload.map { String(format: "%02X", $0) }.joined()
+            var w = cmd(writeCmd)                                    // positive: 7B 91
+            // The dash gates raw writes behind SecurityAccess (NRC 0x33). If a
+            // key table is bundled, unlock (27 01/27 02) and retry the write.
+            if w.count >= 3, w[0] == 0x7F, w[2] == 0x33 {
+                if Elm327.melcoKeyTable() == nil {
+                    log.append("• Dash needs a security unlock, but no key table is bundled in this build.")
+                } else if melcoUnlock7E3({ cmd($0) }) {
+                    log.append("• Security unlock OK — retrying date write.")
+                    w = cmd(writeCmd)
+                } else {
+                    log.append("• Security unlock failed.")
+                }
+            }
+            if w.count >= 3, w[0] == 0x7F { dateWriteNRC = w[2] }
+            dateAck = w.first == 0x7B
+        }
+
         let after91 = record(cmd("021A91"))
         let after93 = record(cmd("021A93"))
 
         let started = r1.first == 0x71
         let results = r2.first == 0x73
         let stopped = r3.first == 0x72
+        let dateSet = !wantDate.isEmpty && after91 == wantDate      // read-back proof
         let changed = (after91 != before91) || (after93 != before93)
-        let success = started && stopped && (changed || results)
+        let success = started && stopped && (dateSet || changed || results)
+
+        func fmtBCDDate(_ b: [UInt8]) -> String {
+            guard b.count == 4 else { return b.hex }
+            func dec(_ x: UInt8) -> Int { Int(x >> 4) * 10 + Int(x & 0x0F) }
+            return String(format: "20%02d-%02d-%02d", dec(b[1]), dec(b[2]), dec(b[3]))
+        }
 
         let msg: String
-        if success && changed {
-            msg = "Reset confirmed: routine acknowledged and service records updated."
+        if started && stopped && dateSet {
+            msg = "✅ Reset complete — service date set to \(fmtBCDDate(after91)). Cycle the ignition to refresh the dash."
+        } else if started && stopped && !wantDate.isEmpty && dateAck {
+            msg = "Routine ran and the date write was accepted, but read-back still shows \(fmtBCDDate(after91)). Cycle the ignition and re-check."
+        } else if started && stopped && !wantDate.isEmpty {
+            let why = dateWriteNRC == 0x33
+                ? "the dash requires a security unlock that isn't available in this build"
+                : "the dash rejected the date write (NRC \(dateWriteNRC.map { String(format: "0x%02X", $0) } ?? "?"))"
+            msg = "Routine acknowledged, but \(why). The reset ran; the date stays at \(fmtBCDDate(after91)). Share the log so the write can be adjusted."
         } else if started && stopped {
             msg = "Routine acknowledged. Records \(changed ? "changed" : "unchanged") — cycle ignition to verify."
         } else if !profile.validated {
@@ -471,5 +524,58 @@ extension Elm327 {
             codes.append("\(letters[Int(a >> 6)])\((a >> 4) & 0x3)" + String(format: "%X%02X", a & 0x0F, b))
         }
         return codes
+    }
+}
+
+// MARK: - Dashboard SecurityAccess (Melco seed→key)
+
+// The dash gates raw writes (e.g. 3B 91, the last-service date) behind KWP
+// SecurityAccess (27 01 seed → 27 02 key). The seed→key mapping ("Voilou") is a
+// fixed vendor lookup table, NEVER committed or shipped publicly — it is loaded
+// at runtime from a bundled asset-catalog data set ("MelcoKeys") present only in
+// private builds. Without it these helpers no-op and the reset falls back to the
+// routine-only path.
+extension Elm327 {
+
+    /// Loads the seed→key table (65536 × 4 bytes) if this build bundled it.
+    static func melcoKeyTable() -> Data? {
+        #if canImport(UIKit) || canImport(AppKit)
+        if let d = NSDataAsset(name: "MelcoKeys")?.data, d.count == 65536 * 4 { return d }
+        #endif
+        return nil
+    }
+
+    /// Voilou seed→key: each 4-byte table slot XOR a fixed keystream yields four
+    /// ASCII hex characters, i.e. the 2-byte key for that 16-bit seed.
+    static func melcoKey(forSeed seed: UInt16, table: Data) -> [UInt8]? {
+        let o = table.startIndex + Int(seed) * 4
+        guard o + 4 <= table.endIndex else { return nil }
+        let ks: [UInt8] = [0x58, 0xEA, 0xF9, 0x5A]
+        var s = ""
+        for n in 0..<4 { s.unicodeScalars.append(UnicodeScalar(table[o + n] ^ ks[n])) }
+        let key = bytesFromHex(s)
+        return key.count == 2 ? key : nil
+    }
+
+    /// Unlock the dashboard ECU via SecurityAccess. `send` runs one ELM command
+    /// and returns the parsed UDS payload. Returns true once the ECU is unlocked
+    /// (or needs no unlock). Requires the bundled key table.
+    func melcoUnlock7E3(_ send: (String) -> [UInt8]) -> Bool {
+        guard let table = Elm327.melcoKeyTable() else { return false }
+
+        var seedResp = send("022701")                       // -> 67 01 SH SL
+        if !(seedResp.count >= 2 && seedResp[0] == 0x67) {
+            _ = send("021003")                              // some firmwares gate 27 behind extended session
+            seedResp = send("022701")
+        }
+        guard seedResp.count >= 4, seedResp[0] == 0x67, seedResp[1] == 0x01 else { return false }
+
+        let seed = (UInt16(seedResp[2]) << 8) | UInt16(seedResp[3])
+        if seed == 0 { return true }                        // already unlocked
+        guard let key = Elm327.melcoKey(forSeed: seed, table: table) else { return false }
+
+        let keyCmd = "042702" + key.map { String(format: "%02X", $0) }.joined()
+        let r = send(keyCmd)                                // -> 67 02
+        return r.first == 0x67 && (r.count < 2 || r[1] == 0x02)
     }
 }

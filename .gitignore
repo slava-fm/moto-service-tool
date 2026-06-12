@@ -35,3 +35,8 @@ MelcoDiag*
 *.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcworkspace/xcuserdata/
 DerivedData/
+
+# Private security key table (vendor asset) — never commit
+MelcoKeys.dataset/
+ios/Sources/Assets.xcassets/MelcoKeys.dataset/
+melco-keys.bin
